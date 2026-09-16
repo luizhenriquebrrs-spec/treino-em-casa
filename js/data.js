@@ -1,3 +1,6 @@
+// Imagens: free-exercise-db (domínio público, Unlicense), versão fixada
+const IMG_BASE = 'https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@a859101d633a01c4a1a920d6a8ce41dabba0705f/exercises/';
+
 // Dados do programa: exercícios, treinos e referências científicas.
 // Volume por músculo usa contagem fracionada: 1 = músculo principal, 0.5 = sinergista.
 
@@ -17,6 +20,7 @@ const MUSCLES = {
 const EXERCISES = {
   goblet: {
     name: 'Agachamento goblet',
+    img: 'Goblet_Squat',
     muscles: { quadriceps: 1, gluteos: 0.5 },
     cues: [
       'Segure UM halter na vertical, colado ao peito.',
@@ -28,6 +32,8 @@ const EXERCISES = {
   },
   bulgaro: {
     name: 'Agachamento búlgaro',
+    img: 'Split_Squat_with_Dumbbells',
+    imgNote: 'Na imagem o pé de trás está no chão; no búlgaro ele fica apoiado no sofá ou cadeira.',
     muscles: { quadriceps: 1, gluteos: 1 },
     unilateral: true,
     cues: [
@@ -40,6 +46,7 @@ const EXERCISES = {
   },
   afundo: {
     name: 'Afundo reverso',
+    img: 'Dumbbell_Rear_Lunge',
     muscles: { quadriceps: 1, gluteos: 0.5 },
     unilateral: true,
     cues: [
@@ -51,6 +58,8 @@ const EXERCISES = {
   },
   rdl: {
     name: 'Levantamento terra romeno (stiff)',
+    img: 'Stiff-Legged_Dumbbell_Deadlift',
+    imgNote: 'Mantenha os joelhos levemente flexionados.',
     muscles: { posteriores: 1, gluteos: 1 },
     cues: [
       'Joelhos levemente flexionados e fixos.',
@@ -62,6 +71,8 @@ const EXERCISES = {
   },
   rdl1: {
     name: 'Stiff unilateral',
+    img: 'Kettlebell_One-Legged_Deadlift',
+    imgNote: 'Imagem com kettlebell; o movimento é o mesmo com halter.',
     muscles: { posteriores: 1, gluteos: 1 },
     unilateral: true,
     cues: [
@@ -73,6 +84,8 @@ const EXERCISES = {
   },
   hipthrust: {
     name: 'Elevação pélvica (hip thrust)',
+    img: 'Barbell_Hip_Thrust',
+    imgNote: 'Imagem com barra; em casa use o halter sobre o quadril.',
     muscles: { gluteos: 1, posteriores: 0.5 },
     cues: [
       'Costas apoiadas na lateral do sofá, halter sobre o quadril (use uma toalha).',
@@ -83,6 +96,8 @@ const EXERCISES = {
   },
   panturrilha: {
     name: 'Panturrilha unilateral no degrau',
+    img: 'Standing_Dumbbell_Calf_Raise',
+    imgNote: 'Faça com uma perna de cada vez, na borda de um degrau.',
     muscles: { panturrilhas: 1 },
     unilateral: true,
     cues: [
@@ -95,6 +110,7 @@ const EXERCISES = {
   },
   floorpress: {
     name: 'Supino no chão',
+    img: 'Dumbbell_Floor_Press',
     muscles: { peito: 1, triceps: 0.5, ombros: 0.5 },
     cues: [
       'Deitado, joelhos flexionados, cotovelos a ~45° do tronco.',
@@ -106,6 +122,8 @@ const EXERCISES = {
   },
   flexao: {
     name: 'Flexão com déficit (mãos nos halteres)',
+    img: 'Pushups',
+    imgNote: 'Para o déficit, apoie as mãos nos halteres e desça o peito abaixo das mãos.',
     muscles: { peito: 1, triceps: 0.5, ombros: 0.5 },
     cues: [
       'Mãos segurando os halteres no chão: o peito desce abaixo das mãos.',
@@ -117,6 +135,7 @@ const EXERCISES = {
   },
   desenvolvimento: {
     name: 'Desenvolvimento em pé',
+    img: 'Standing_Dumbbell_Press',
     muscles: { ombros: 1, triceps: 0.5 },
     cues: [
       'Glúteo e abdômen contraídos, sem arquear a lombar.',
@@ -127,6 +146,7 @@ const EXERCISES = {
   },
   lateral: {
     name: 'Elevação lateral',
+    img: 'Side_Lateral_Raise',
     muscles: { ombros: 1 },
     cues: [
       'Leve inclinação do tronco à frente, cotovelos levemente flexionados.',
@@ -138,6 +158,7 @@ const EXERCISES = {
   },
   remada: {
     name: 'Remada curvada',
+    img: 'Bent_Over_Two-Dumbbell_Row',
     muscles: { costas: 1, biceps: 0.5 },
     cues: [
       'Tronco inclinado ~45°, coluna neutra, joelhos flexionados.',
@@ -148,6 +169,8 @@ const EXERCISES = {
   },
   remada1: {
     name: 'Remada unilateral apoiada',
+    img: 'One-Arm_Dumbbell_Row',
+    imgNote: 'Imagem com banco; em casa apoie mão e joelho numa cadeira ou sofá.',
     muscles: { costas: 1, biceps: 0.5 },
     unilateral: true,
     cues: [
@@ -159,6 +182,8 @@ const EXERCISES = {
   },
   pullover: {
     name: 'Pullover com halter',
+    img: 'Bent-Arm_Dumbbell_Pullover',
+    imgNote: 'Imagem com banco; em casa use o sofá ou a cama.',
     muscles: { costas: 1, peito: 0.5 },
     cues: [
       'Deitado atravessado no sofá/cama (ou no chão), segure um halter com as duas mãos.',
@@ -170,6 +195,8 @@ const EXERCISES = {
   },
   crucifixoinv: {
     name: 'Crucifixo invertido',
+    img: 'Seated_Bent-Over_Rear_Delt_Raise',
+    imgNote: 'Pode ser feito sentado (como na imagem) ou em pé com o tronco inclinado.',
     muscles: { ombros: 0.5, costas: 0.5 },
     cues: [
       'Tronco quase paralelo ao chão, braços semi-flexionados.',
@@ -180,6 +207,7 @@ const EXERCISES = {
   },
   rosca: {
     name: 'Rosca alternada',
+    img: 'Dumbbell_Alternate_Bicep_Curl',
     muscles: { biceps: 1 },
     cues: [
       'Cotovelos fixos ao lado do corpo, gire a palma para cima ao subir.',
@@ -190,6 +218,7 @@ const EXERCISES = {
   },
   martelo: {
     name: 'Rosca martelo',
+    img: 'Hammer_Curls',
     muscles: { biceps: 1 },
     cues: [
       'Pegada neutra (palmas uma para a outra).',
@@ -200,6 +229,7 @@ const EXERCISES = {
   },
   frances: {
     name: 'Tríceps francês (acima da cabeça)',
+    img: 'Standing_Dumbbell_Triceps_Extension',
     muscles: { triceps: 1 },
     cues: [
       'Segure UM halter com as duas mãos atrás da cabeça.',
@@ -211,6 +241,8 @@ const EXERCISES = {
   },
   testa: {
     name: 'Tríceps testa no chão',
+    img: 'Lying_Dumbbell_Tricep_Extension',
+    imgNote: 'Imagem com banco; no chão funciona igual.',
     muscles: { triceps: 1 },
     cues: [
       'Deitado, halteres descem ao lado da cabeça (pegada neutra).',
@@ -221,6 +253,7 @@ const EXERCISES = {
   },
   abdominal: {
     name: 'Abdominal com peso',
+    img: 'Weighted_Crunches',
     muscles: { abdomen: 1 },
     cues: [
       'Halter no peito, enrole a coluna (costelas em direção ao quadril).',
@@ -231,6 +264,8 @@ const EXERCISES = {
   },
   prancha: {
     name: 'Dead bug com halter',
+    img: 'Dead_Bug',
+    imgNote: 'Na versão com peso, segure o halter com os braços estendidos.',
     muscles: { abdomen: 1 },
     unilateral: true,
     cues: [
@@ -242,6 +277,7 @@ const EXERCISES = {
   },
   fazendeiro: {
     name: 'Caminhada do fazendeiro',
+    img: 'Farmers_Walk',
     muscles: { abdomen: 0.5 },
     repsUnit: 's',
     cues: [
@@ -255,67 +291,13 @@ const EXERCISES = {
 
 // sets: número de séries; reps: [mín, máx]; rir: reps na reserva alvo; rest: segundos
 const PLANS = {
-  fb3: {
-    name: 'Full Body 3x',
-    tag: 'Recomendado para a maioria',
-    schedule: 'Seg · Qua · Sex (ou qualquer 3 dias não seguidos)',
-    duration: '50–60 min',
-    description:
-      'Corpo todo em cada sessão, cada músculo treinado 2–3x/semana. Ideal para iniciantes e intermediários e para quem tem pouco tempo.',
-    days: [
-      {
-        id: 'A',
-        name: 'Treino A',
-        focus: 'Agachamento · Empurrar · Puxar',
-        items: [
-          { ex: 'goblet', sets: 4, reps: [10, 20], rir: '1–2', rest: 120 },
-          { ex: 'floorpress', sets: 3, reps: [8, 15], rir: '1–2', rest: 120 },
-          { ex: 'remada', sets: 3, reps: [8, 15], rir: '1–2', rest: 120 },
-          { ex: 'rdl', sets: 4, reps: [8, 15], rir: '1–2', rest: 120 },
-          { ex: 'lateral', sets: 3, reps: [12, 25], rir: '0–1', rest: 60 },
-          { ex: 'frances', sets: 3, reps: [10, 20], rir: '0–1', rest: 75 },
-          { ex: 'panturrilha', sets: 4, reps: [10, 20], rir: '0–1', rest: 60 },
-          { ex: 'prancha', sets: 3, reps: [8, 12], rir: '2', rest: 45 },
-        ],
-      },
-      {
-        id: 'B',
-        name: 'Treino B',
-        focus: 'Unilateral · Ombros · Glúteos',
-        items: [
-          { ex: 'bulgaro', sets: 3, reps: [8, 15], rir: '1–2', rest: 120 },
-          { ex: 'desenvolvimento', sets: 3, reps: [8, 15], rir: '1–2', rest: 120 },
-          { ex: 'remada1', sets: 3, reps: [8, 15], rir: '1–2', rest: 90 },
-          { ex: 'hipthrust', sets: 3, reps: [10, 20], rir: '1–2', rest: 90 },
-          { ex: 'flexao', sets: 3, reps: [6, 25], rir: '1–2', rest: 90 },
-          { ex: 'rosca', sets: 3, reps: [10, 20], rir: '0–1', rest: 60 },
-          { ex: 'abdominal', sets: 3, reps: [10, 20], rir: '1–2', rest: 60 },
-        ],
-      },
-      {
-        id: 'C',
-        name: 'Treino C',
-        focus: 'Posteriores · Dorsal alongado · Braços',
-        items: [
-          { ex: 'afundo', sets: 3, reps: [8, 15], rir: '1–2', rest: 90 },
-          { ex: 'floorpress', sets: 3, reps: [8, 15], rir: '1–2', rest: 120 },
-          { ex: 'pullover', sets: 3, reps: [10, 15], rir: '1–2', rest: 90 },
-          { ex: 'rdl1', sets: 4, reps: [8, 15], rir: '1–2', rest: 90 },
-          { ex: 'crucifixoinv', sets: 3, reps: [12, 25], rir: '0–1', rest: 60 },
-          { ex: 'martelo', sets: 3, reps: [10, 20], rir: '0–1', rest: 60 },
-          { ex: 'testa', sets: 3, reps: [10, 20], rir: '0–1', rest: 60 },
-          { ex: 'panturrilha', sets: 4, reps: [10, 20], rir: '0–1', rest: 60 },
-        ],
-      },
-    ],
-  },
   ul4: {
     name: 'Superior / Inferior 4x',
-    tag: 'Mais volume',
+    tag: 'Seu programa',
     schedule: 'Seg · Ter · Qui · Sex',
     duration: '45–55 min',
     description:
-      'Divide membros superiores e inferiores, cada músculo 2x/semana com mais séries por sessão. Bom para quem já treina há 6+ meses ou quer mais volume.',
+      'Divide membros superiores e inferiores, cada músculo 2x/semana com mais séries por sessão. Sessões mais curtas e focadas, com mais séries por grupo muscular em cada treino.',
     days: [
       {
         id: 'S1',
@@ -376,13 +358,13 @@ const PRINCIPLES = [
   {
     title: 'Volume: 10+ séries por músculo por semana',
     body:
-      'Mais séries semanais produzem mais hipertrofia, com retorno decrescente. A faixa de ~10–20 séries por músculo é o ponto de partida mais usado. Os dois programas ficam nessa faixa (veja o gráfico na aba Programa).',
+      'Mais séries semanais produzem mais hipertrofia, com retorno decrescente. A faixa de ~10–20 séries por músculo é o ponto de partida mais usado. O programa fica nessa faixa na maioria dos músculos (veja o gráfico na aba Programa).',
     refs: ['schoenfeld2017vol', 'pelland2024'],
   },
   {
     title: 'Frequência: cada músculo 2x por semana',
     body:
-      'Com o volume igualado, a frequência importa pouco, mas treinar cada músculo pelo menos 2x/semana é uma forma prática de distribuir as séries com qualidade.',
+      'Com o volume igualado, a frequência importa pouco, mas treinar cada músculo pelo menos 2x/semana é uma forma prática de distribuir as séries com qualidade — exatamente o que a divisão Superior/Inferior 4x faz.',
     refs: ['schoenfeld2016freq', 'pelland2024'],
   },
   {
@@ -424,7 +406,7 @@ const PRINCIPLES = [
   {
     title: 'Saúde: força + aeróbico',
     body:
-      'A OMS recomenda fortalecimento muscular 2+ dias/semana e 150–300 min de atividade aeróbica moderada. Caminhar nos dias sem treino é um ótimo complemento.',
+      'A OMS recomenda fortalecimento muscular 2+ dias/semana e 150–300 min de atividade aeróbica moderada. Caminhar nos 3 dias sem treino é um ótimo complemento.',
     refs: ['who2020'],
   },
 ];

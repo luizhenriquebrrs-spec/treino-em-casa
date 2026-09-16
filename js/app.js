@@ -6,7 +6,7 @@
 
   // ---------- estado ----------
 
-  const defaultState = () => ({ plan: 'fb3', sessions: [], draft: null });
+  const defaultState = () => ({ plan: 'ul4', sessions: [], draft: null });
 
   function loadState() {
     try {
@@ -19,6 +19,13 @@
   }
 
   let state = loadState();
+  // planos removidos (ex.: Full Body) → volta para o programa atual
+  if (!PLANS[state.plan]) state.plan = 'ul4';
+  if (state.draft && !findDayIn(state.draft.plan, state.draft.day)) state.draft = null;
+
+  function findDayIn(planId, dayId) {
+    return PLANS[planId] ? PLANS[planId].days.find((d) => d.id === dayId) : undefined;
+  }
 
   function save() {
     try {
@@ -40,9 +47,9 @@
   const fmtDate = (iso) =>
     new Date(iso).toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
 
-  const plan = () => PLANS[state.plan] || PLANS.fb3;
+  const plan = () => PLANS[state.plan] || PLANS.ul4;
 
-  const findDay = (planId, dayId) => (PLANS[planId] || plan()).days.find((d) => d.id === dayId);
+  const findDay = findDayIn;
 
   const unitOf = (ex) => EXERCISES[ex].repsUnit || 'reps';
 
@@ -161,11 +168,6 @@
     return `
       <div class="stack-lg">
         <div class="stack">
-          <div class="seg" role="group" aria-label="Escolher programa">
-            ${Object.entries(PLANS)
-              .map(([id, pl]) => `<button type="button" data-plan="${id}" aria-pressed="${id === state.plan}">${esc(pl.name)}</button>`)
-              .join('')}
-          </div>
           ${draftBanner}
           <section class="hero stack">
             <div class="row between">
@@ -301,13 +303,25 @@
       .join('');
     const allDone = sets.length && sets.every((s) => s.done);
     const yt = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(ex.name + ' halter execução');
+    const media = ex.img
+      ? `<button type="button" class="demo" data-action="zoom" aria-expanded="false" aria-label="Ampliar imagem de ${esc(ex.name)}">
+          <img src="${IMG_BASE}${ex.img}/0.jpg" alt="${esc(ex.name)}: posição inicial" loading="lazy" width="850" height="567">
+          <img src="${IMG_BASE}${ex.img}/1.jpg" alt="${esc(ex.name)}: posição final" loading="lazy" width="850" height="567">
+        </button>`
+      : '';
 
     return `
       <article class="card ex ${allDone ? 'done' : ''}" data-key="${esc(key)}" data-rest="${item.rest}">
         <div class="ex-head">
-          <div class="ex-num">${index + 1} / ${findDay(draft.plan, draft.day).items.length}</div>
-          <h3>${esc(ex.name)}</h3>
-          <div class="chips">${muscles}</div>
+          <div class="ex-title">
+            ${media}
+            <div>
+              <div class="ex-num">${index + 1} / ${findDay(draft.plan, draft.day).items.length}</div>
+              <h3>${esc(ex.name)}</h3>
+              <div class="chips">${muscles}</div>
+            </div>
+          </div>
+          ${ex.imgNote ? `<p class="small muted img-note">${esc(ex.imgNote)}</p>` : ''}
           <div class="target">
             <span><b>${item.sets}</b> × <b>${item.reps[0]}–${item.reps[1]}</b> ${unit}${ex.unilateral ? ' /lado' : ''}</span>
             <span>RIR <b>${esc(item.rir)}</b></span>
@@ -319,7 +333,7 @@
           <summary>Como fazer</summary>
           <ul class="small">${ex.cues.map((c) => `<li>${esc(c)}</li>`).join('')}</ul>
           <p class="small"><b>Mais fácil:</b> ${esc(ex.easier)}<br><b>Mais difícil:</b> ${esc(ex.harder)}</p>
-          <p class="small" style="margin-top:6px"><a href="${yt}" target="_blank" rel="noopener">Ver vídeos da execução ↗</a></p>
+          <p class="small" style="margin-top:6px"><a href="${yt}" target="_blank" rel="noopener">▶ Ver vídeos da execução no YouTube ↗</a></p>
         </details>
         <div class="sets">
           <div class="set-head"><span></span><span>kg</span><span>${unit}</span><span></span></div>
@@ -356,7 +370,6 @@
               <span class="tag">${esc(p.tag)}</span>
               <h2>${esc(p.name)}</h2>
             </div>
-            ${active ? '<span class="chip main">Programa atual</span>' : `<button class="btn sm" type="button" data-plan="${id}">Usar este</button>`}
           </div>
           <p>${esc(p.description)}</p>
           <p class="small muted">${esc(p.schedule)} · ${esc(p.duration)}</p>
@@ -371,7 +384,7 @@
                 ${d.items
                   .map(
                     (it) =>
-                      `<tr><td>${esc(EXERCISES[it.ex].name)}</td><td>${it.sets} × ${it.reps[0]}–${it.reps[1]}${EXERCISES[it.ex].repsUnit === 's' ? ' s' : ''}</td></tr>`
+                      `<tr><td>${EXERCISES[it.ex].img ? `<img class="thumb" src="${IMG_BASE}${EXERCISES[it.ex].img}/1.jpg" alt="" loading="lazy">` : ''}${esc(EXERCISES[it.ex].name)}</td><td>${it.sets} × ${it.reps[0]}–${it.reps[1]}${EXERCISES[it.ex].repsUnit === 's' ? ' s' : ''}</td></tr>`
                   )
                   .join('')}
               </table>`
@@ -395,7 +408,7 @@
       <div class="stack-lg">
         <div class="stack">
           <h1>Programa</h1>
-          <p class="muted">Dois programas montados só com 2 halteres, sem banco nem barra fixa. Um sofá, uma cadeira e um degrau ajudam.</p>
+          <p class="muted">Programa montado só com 2 halteres, sem banco nem barra fixa. Um sofá, uma cadeira e um degrau ajudam.</p>
         </div>
 
         ${cards}
@@ -681,6 +694,12 @@
       return;
     }
 
+    if (action === 'zoom') {
+      const open = card.classList.toggle('zoomed');
+      btn.setAttribute('aria-expanded', open);
+      return;
+    }
+
     if (action === 'finish') return finishWorkout();
 
     if (action === 'discard-draft') {
@@ -753,7 +772,7 @@
         const data = JSON.parse(reader.result);
         if (!Array.isArray(data.sessions)) throw new Error('formato');
         if (!confirm(`Importar ${data.sessions.length} treinos? Isso substitui o histórico atual.`)) return;
-        state = { ...defaultState(), plan: PLANS[data.plan] ? data.plan : 'fb3', sessions: data.sessions };
+        state = { ...defaultState(), plan: PLANS[data.plan] ? data.plan : 'ul4', sessions: data.sessions };
         save();
         toast('Backup importado');
         rerender();
