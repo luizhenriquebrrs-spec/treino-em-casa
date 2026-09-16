@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Treino em Casa</title>
+  <meta name="description" content="Rotina de treino em casa com 2 halteres, baseada em evidências científicas.">
+  <meta name="theme-color" content="#0f1110">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a href="#hoje" class="brand">
+      <img src="icon.svg" alt="" width="28" height="28">
+      <span>Treino em Casa</span>
+    </a>
+  </header>
+
+  <main id="app" tabindex="-1"></main>
+
+  <div id="timer" class="timer" hidden>
+    <div class="timer-info">
+      <span class="timer-label">Descanso</span>
+      <span class="timer-time" id="timer-time">0:00</span>
+    </div>
+    <div class="timer-bar"><div id="timer-progress"></div></div>
+    <div class="timer-actions">
+      <button type="button" data-timer="add">+15 s</button>
+      <button type="button" data-timer="skip" class="primary">Pular</button>
+    </div>
+  </div>
+
+  <nav class="tabbar" aria-label="Navegação principal">
+    <a href="#hoje" data-tab="hoje">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11"/></svg>
+      <span>Treinar</span>
+    </a>
+    <a href="#programa" data-tab="programa">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>
+      <span>Programa</span>
+    </a>
+    <a href="#ciencia" data-tab="ciencia">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3"/><path d="M7.5 15h9"/></svg>
+      <span>Ciência</span>
+    </a>
+    <a href="#historico" data-tab="historico">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>
+      <span>Histórico</span>
+    </a>
+  </nav>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
