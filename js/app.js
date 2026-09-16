@@ -6,7 +6,7 @@
 
   // ---------- estado ----------
 
-  const defaultState = () => ({ plan: 'ul4', sessions: [], drafts: {} });
+  const defaultState = () => ({ plan: 'ul4', sessions: [], drafts: {}, profile: null, weights: [] });
   const DRAFT_TTL = 12 * 3600 * 1000; // treino não concluído é descartado após 12 h
 
   function loadState() {
@@ -183,6 +183,8 @@
           </section>
         </div>
 
+        ${homeNutritionCard()}
+
         <div class="stats">
           <div class="stat"><b>${sessionsThisWeek()}</b><span class="small muted">treinos nesta semana</span></div>
           <div class="stat"><b>${streakWeeks()}</b><span class="small muted">semanas seguidas</span></div>
@@ -217,7 +219,8 @@
             <li><b>Chegue perto da falha:</b> termine cada série com 0–2 reps na reserva.</li>
             <li><b>Progrida sempre:</b> bateu o topo da faixa em todas as séries? Suba carga ou dificuldade.</li>
             <li><b>Amplitude completa,</b> com ênfase na parte alongada do movimento.</li>
-            <li><b>Consistência > perfeição:</b> 3 treinos por semana por meses vencem qualquer rotina "ideal" abandonada.</li>
+            <li><b>Coma em superávit:</b> sem o peso subindo 0,25–0,5% por semana, o volume extra não vira músculo.</li>
+            <li><b>Consistência > perfeição:</b> 4 treinos por semana por meses vencem qualquer rotina "ideal" abandonada.</li>
           </ol>
         </section>
       </div>`;
@@ -446,12 +449,204 @@
       .join('');
   }
 
+  function refLink(id) {
+    const text = REFERENCES[id];
+    const title = text.split('. ').slice(1, 2).join('');
+    return `<li><a href="https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(title)}" target="_blank" rel="noopener">${esc(text)}</a></li>`;
+  }
+
+  // ---------- nutrição ----------
+
+  const ACTIVITY = [
+    { f: 1.5, label: 'Trabalho sentado + 4 treinos' },
+    { f: 1.65, label: 'Em pé ou andando boa parte do dia + 4 treinos' },
+    { f: 1.8, label: 'Trabalho físico pesado + 4 treinos' },
+  ];
+
+  const round50 = (n) => Math.round(n / 50) * 50;
+  const fmtInt = (n) => Math.round(n).toLocaleString('pt-BR');
+  const today = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+
+  function latestWeight() {
+    const w = state.weights;
+    return w.length ? w[w.length - 1].kg : state.profile?.weight;
+  }
+
+  // Mifflin-St Jeor × fator de atividade; superávit de 15%; ajuste manual por tendência do peso
+  function targets() {
+    const pr = state.profile;
+    if (!pr) return null;
+    const kg = latestWeight();
+    const bmr = 10 * kg + 6.25 * pr.height - 5 * pr.age + (pr.sex === 'f' ? -161 : 5);
+    const maintenance = bmr * pr.activity;
+    const kcal = round50(maintenance * 1.15 + (pr.adjust || 0));
+    const protein = Math.round(kg * 2);
+    const fat = Math.round(kg * 1);
+    const carbs = Math.max(0, Math.round((kcal - protein * 4 - fat * 9) / 4));
+    return { kg, maintenance: round50(maintenance), kcal, protein, fat, carbs };
+  }
+
+  // compara a média dos últimos 7 dias com a dos 7 anteriores
+  function weightTrend() {
+    const now = new Date(today() + 'T12:00:00');
+    const daysAgo = (d) => Math.round((now - new Date(d + 'T12:00:00')) / 86400000);
+    const avg = (arr) => arr.reduce((a, x) => a + x.kg, 0) / arr.length;
+    const recent = state.weights.filter((w) => daysAgo(w.date) <= 6);
+    const prev = state.weights.filter((w) => daysAgo(w.date) >= 7 && daysAgo(w.date) <= 13);
+    if (recent.length < 2 || prev.length < 2) return null;
+    const a = avg(prev);
+    const b = avg(recent);
+    return { prev: a, recent: b, pct: ((b - a) / a) * 100 };
+  }
+
+  function homeNutritionCard() {
+    const t = targets();
+    if (!t) {
+      return `<a class="card row between" href="#nutricao" style="text-decoration:none;color:inherit">
+        <span><b>Configure sua meta de calorias</b><br><span class="small muted">Sem superávit calórico o treino não vira massa.</span></span>
+        <span class="chev muted" aria-hidden="true">›</span>
+      </a>`;
+    }
+    const logged = state.weights.some((w) => w.date === today());
+    return `<a class="card row between" href="#nutricao" style="text-decoration:none;color:inherit">
+      <span>
+        <span class="eyebrow">Meta de hoje</span><br>
+        <b style="font:700 26px/1.1 var(--font-display)">${fmtInt(t.kcal)} kcal</b>
+        <span class="small muted"> · ${t.protein} g proteína</span><br>
+        <span class="small ${logged ? 'muted' : ''}" style="${logged ? '' : 'color:var(--accent)'}">${logged ? 'Peso de hoje registrado ✓' : 'Registrar peso de hoje →'}</span>
+      </span>
+      <span class="chev muted" aria-hidden="true">›</span>
+    </a>`;
+  }
+
+  function weightChart() {
+    const pts = state.weights.slice(-30);
+    if (pts.length < 2) return '';
+    const W = 320;
+    const H = 90;
+    const min = Math.min(...pts.map((p) => p.kg)) - 0.3;
+    const max = Math.max(...pts.map((p) => p.kg)) + 0.3;
+    const x = (i) => (i / (pts.length - 1)) * (W - 8) + 4;
+    const y = (kg) => H - 6 - ((kg - min) / (max - min)) * (H - 12);
+    const line = pts.map((p, i) => `${x(i).toFixed(1)},${y(p.kg).toFixed(1)}`).join(' ');
+    return `<svg class="wchart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Peso de ${fmtNum(pts[0].kg)} a ${fmtNum(pts[pts.length - 1].kg)} kg">
+      <polyline points="${line}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+      ${pts.map((p, i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(p.kg).toFixed(1)}" r="2.5" fill="var(--accent)"/>`).join('')}
+    </svg>`;
+  }
+
+  function viewNutrition() {
+    const pr = state.profile || { sex: 'm', age: '', height: '', weight: '', activity: 1.5, adjust: 0 };
+    const t = targets();
+    const trend = weightTrend();
+
+    let advice = '<p class="small muted">Registre o peso pelo menos 2 vezes em cada uma das últimas duas semanas para ver a tendência.</p>';
+    if (trend && t) {
+      const kgWeek = trend.recent - trend.prev;
+      const head = `<p><b>${kgWeek >= 0 ? '+' : ''}${kgWeek.toFixed(2).replace('.', ',')} kg</b> na média da última semana <span class="muted">(${trend.pct >= 0 ? '+' : ''}${trend.pct.toFixed(2).replace('.', ',')}%)</span></p>`;
+      if (trend.pct < 0.2) {
+        advice = `<div class="hint up" style="margin:0">${head}<strong>Abaixo do alvo.</strong> Coma mais ~200 kcal por dia.
+          <br><button class="btn sm primary" type="button" data-action="adjust" data-kcal="200" style="margin-top:8px">Aplicar +200 kcal na meta</button></div>`;
+      } else if (trend.pct > 0.6) {
+        advice = `<div class="hint" style="margin:0">${head}<strong>Rápido demais</strong> — provavelmente muita gordura. Reduza ~150 kcal.
+          <br><button class="btn sm" type="button" data-action="adjust" data-kcal="-150" style="margin-top:8px">Aplicar −150 kcal na meta</button></div>`;
+      } else {
+        advice = `<div class="hint up" style="margin:0">${head}<strong>No ritmo certo.</strong> Mantenha as calorias.</div>`;
+      }
+    }
+
+    const weights = [...state.weights].reverse().slice(0, 14);
+
+    return `
+      <div class="stack-lg">
+        <div class="stack">
+          <h1>Nutrição</h1>
+          <p class="muted">Para quem tem dificuldade em ganhar peso, é aqui que o resultado é decidido.</p>
+        </div>
+
+        ${
+          t
+            ? `<section class="card stack">
+          <div class="eyebrow">Sua meta diária</div>
+          <div class="macros">
+            <div class="macro big"><b>${fmtInt(t.kcal)}</b><span>kcal</span></div>
+            <div class="macro"><b>${t.protein} g</b><span>proteína</span></div>
+            <div class="macro"><b>${t.carbs} g</b><span>carboidrato</span></div>
+            <div class="macro"><b>${t.fat} g</b><span>gordura</span></div>
+          </div>
+          <p class="small muted">Manutenção estimada: ${fmtInt(t.maintenance)} kcal · superávit de 15%${pr.adjust ? ` · ajuste ${pr.adjust > 0 ? '+' : ''}${pr.adjust} kcal` : ''} · peso usado: ${fmtNum(t.kg)} kg. Alvo de ganho: ${(t.kg * 0.0025).toFixed(2).replace('.', ',')}–${(t.kg * 0.005).toFixed(2).replace('.', ',')} kg por semana.</p>
+          ${pr.adjust ? '<button class="linkbtn" type="button" data-action="adjust-reset" style="justify-self:start">Zerar ajuste</button>' : ''}
+        </section>`
+            : ''
+        }
+
+        <section class="card stack">
+          <h2>Peso corporal</h2>
+          <form class="weight-form" data-form="weight">
+            <input class="field" type="number" name="kg" inputmode="decimal" step="0.1" min="30" max="250" placeholder="kg" required aria-label="Peso em kg" value="${state.weights.find((w) => w.date === today())?.kg ?? ''}">
+            <input class="field" type="date" name="date" value="${today()}" max="${today()}" aria-label="Data" required>
+            <button class="btn primary" type="submit">Salvar</button>
+          </form>
+          ${weightChart()}
+          ${advice}
+          ${
+            weights.length
+              ? `<table class="plan">${weights
+                  .map(
+                    (w) =>
+                      `<tr><td>${fmtDate(w.date + 'T12:00:00')}</td><td><b style="color:var(--text)">${fmtNum(w.kg)} kg</b> <button class="linkbtn" type="button" data-action="del-weight" data-date="${esc(w.date)}" aria-label="Excluir">✕</button></td></tr>`
+                  )
+                  .join('')}</table>`
+              : ''
+          }
+        </section>
+
+        <section class="card stack">
+          <h2>${t ? 'Seus dados' : 'Calcular meta'}</h2>
+          <form class="stack" data-form="profile">
+            <div class="grid2">
+              <label class="lbl">Sexo
+                <select class="field" name="sex">
+                  <option value="m" ${pr.sex !== 'f' ? 'selected' : ''}>Masculino</option>
+                  <option value="f" ${pr.sex === 'f' ? 'selected' : ''}>Feminino</option>
+                </select>
+              </label>
+              <label class="lbl">Idade<input class="field" type="number" name="age" min="14" max="90" required value="${esc(pr.age)}"></label>
+              <label class="lbl">Altura (cm)<input class="field" type="number" name="height" min="120" max="230" required value="${esc(pr.height)}"></label>
+              <label class="lbl">Peso (kg)<input class="field" type="number" name="weight" step="0.1" min="30" max="250" required value="${esc(latestWeight() ?? '')}"></label>
+            </div>
+            <label class="lbl">Rotina
+              <select class="field" name="activity">
+                ${ACTIVITY.map((a) => `<option value="${a.f}" ${Number(pr.activity) === a.f ? 'selected' : ''}>${esc(a.label)}</option>`).join('')}
+              </select>
+            </label>
+            <button class="btn primary block" type="submit">${t ? 'Atualizar' : 'Calcular minha meta'}</button>
+          </form>
+          <p class="small muted">A estimativa (Mifflin-St Jeor) erra facilmente 10% para mais ou para menos — o registro de peso é o que calibra a meta.</p>
+        </section>
+
+        <section class="card stack">
+          <h2>Comer mais sem sofrer</h2>
+          <ul class="small" style="margin:0;padding-left:18px;display:grid;gap:6px">${HARDGAINER_TIPS.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
+        </section>
+
+        ${NUTRITION.map(
+          (n) => `
+          <section class="card principle">
+            <h3>${esc(n.title)}</h3>
+            <p>${esc(n.body)}</p>
+            <ul class="refs">${n.refs.map(refLink).join('')}</ul>
+          </section>`
+        ).join('')}
+
+        <p class="small muted">Valores de referência para adultos saudáveis. Com condições de saúde ou uso de medicamentos, ajuste com um nutricionista ou médico.</p>
+      </div>`;
+  }
+
   function viewScience() {
-    const refLink = (id) => {
-      const text = REFERENCES[id];
-      const title = text.split('. ').slice(1, 2).join('');
-      return `<li><a href="https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(title)}" target="_blank" rel="noopener">${esc(text)}</a></li>`;
-    };
     return `
       <div class="stack-lg">
         <div class="stack">
@@ -578,6 +773,7 @@
       programa: viewProgram,
       ciencia: viewScience,
       historico: viewHistory,
+      nutricao: viewNutrition,
     };
     current = null;
     app.innerHTML = (views[page] || viewNotFound)();
@@ -629,6 +825,44 @@
     }
     save();
   });
+
+  app.addEventListener('submit', (e) => {
+    const form = e.target.closest('form[data-form]');
+    if (!form) return;
+    e.preventDefault();
+    const f = Object.fromEntries(new FormData(form));
+
+    if (form.dataset.form === 'profile') {
+      const weight = Number(f.weight);
+      state.profile = {
+        sex: f.sex,
+        age: Number(f.age),
+        height: Number(f.height),
+        weight,
+        activity: Number(f.activity),
+        adjust: state.profile?.adjust || 0,
+      };
+      // o peso digitado aqui também entra no registro de hoje
+      upsertWeight(today(), weight);
+      save();
+      toast('Meta calculada');
+      rerender();
+    }
+
+    if (form.dataset.form === 'weight') {
+      upsertWeight(f.date || today(), Number(f.kg));
+      save();
+      toast('Peso registrado');
+      rerender();
+    }
+  });
+
+  function upsertWeight(date, kg) {
+    if (!(kg > 0)) return;
+    state.weights = state.weights.filter((w) => w.date !== date).concat({ date, kg });
+    state.weights.sort((a, b) => a.date.localeCompare(b.date));
+    if (state.profile) state.profile.weight = state.weights[state.weights.length - 1].kg;
+  }
 
   app.addEventListener('change', (e) => {
     if (e.target.dataset.action === 'import') importBackup(e.target.files[0]);
@@ -712,6 +946,22 @@
     }
 
     if (action === 'export') return exportBackup();
+
+    if (action === 'adjust' || action === 'adjust-reset') {
+      if (!state.profile) return;
+      state.profile.adjust = action === 'adjust' ? (state.profile.adjust || 0) + Number(btn.dataset.kcal) : 0;
+      save();
+      toast(action === 'adjust' ? 'Meta ajustada' : 'Ajuste zerado');
+      rerender();
+      return;
+    }
+
+    if (action === 'del-weight') {
+      state.weights = state.weights.filter((w) => w.date !== btn.dataset.date);
+      save();
+      rerender();
+      return;
+    }
   });
 
   function finishWorkout() {
@@ -764,7 +1014,13 @@
         const data = JSON.parse(reader.result);
         if (!Array.isArray(data.sessions)) throw new Error('formato');
         if (!confirm(`Importar ${data.sessions.length} treinos? Isso substitui o histórico atual.`)) return;
-        state = { ...defaultState(), plan: PLANS[data.plan] ? data.plan : 'ul4', sessions: data.sessions };
+        state = {
+          ...defaultState(),
+          plan: PLANS[data.plan] ? data.plan : 'ul4',
+          sessions: data.sessions,
+          profile: data.profile || null,
+          weights: Array.isArray(data.weights) ? data.weights : [],
+        };
         save();
         toast('Backup importado');
         rerender();

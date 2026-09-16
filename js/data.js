@@ -275,6 +275,20 @@ const EXERCISES = {
     easier: 'Sem halter',
     harder: 'Halter mais pesado, pernas mais esticadas',
   },
+  nordica: {
+    name: 'Flexão nórdica (pés sob o sofá)',
+    img: 'Natural_Glute_Ham_Raise',
+    imgNote: 'Na imagem os pés estão presos num aparelho; em casa prenda os calcanhares sob o sofá ou a cama.',
+    muscles: { posteriores: 1 },
+    cues: [
+      'Ajoelhado numa almofada, calcanhares presos sob o sofá, quadril estendido.',
+      'Desça o tronco para frente o mais devagar possível (3–5 s), resistindo com a parte de trás da coxa.',
+      'Apare a queda com as mãos e empurre o chão para voltar.',
+      'Sem mesa flexora, é o melhor exercício de posteriores que dá para fazer em casa.',
+    ],
+    easier: 'Amplitude parcial ou empurrando mais com as mãos na volta',
+    harder: 'Descida mais lenta, segurando um halter no peito',
+  },
   fazendeiro: {
     name: 'Caminhada do fazendeiro',
     img: 'Farmers_Walk',
@@ -293,23 +307,24 @@ const EXERCISES = {
 const PLANS = {
   ul4: {
     name: 'Superior / Inferior 4x',
-    tag: 'Seu programa',
+    tag: 'Volume alto · ganho de massa',
     schedule: 'Seg · Ter · Qui · Sex',
-    duration: '45–55 min',
+    duration: '55–70 min',
     description:
-      'Divide membros superiores e inferiores, cada músculo 2x/semana com mais séries por sessão. Sessões mais curtas e focadas, com mais séries por grupo muscular em cada treino.',
+      'Cada músculo 2x/semana com volume alto (~12–18 séries semanais) e ênfase em peito, costas, ombros e braços. Feito para quem recupera bem e tem dificuldade para ganhar massa: o estímulo vem do volume e da proximidade da falha; o crescimento vem do superávit calórico (aba Nutrição).',
     days: [
       {
         id: 'S1',
         name: 'Superior 1',
-        focus: 'Força de empurrar e puxar',
+        focus: 'Peito e costas · cargas mais altas',
         items: [
           { ex: 'floorpress', sets: 4, reps: [6, 12], rir: '1–2', rest: 150 },
           { ex: 'remada', sets: 4, reps: [8, 12], rir: '1–2', rest: 120 },
           { ex: 'desenvolvimento', sets: 3, reps: [8, 12], rir: '1–2', rest: 120 },
-          { ex: 'pullover', sets: 3, reps: [10, 15], rir: '1–2', rest: 90 },
-          { ex: 'rosca', sets: 3, reps: [10, 15], rir: '0–1', rest: 60 },
-          { ex: 'frances', sets: 3, reps: [10, 15], rir: '0–1', rest: 60 },
+          { ex: 'flexao', sets: 3, reps: [8, 25], rir: '1', rest: 90 },
+          { ex: 'pullover', sets: 4, reps: [10, 15], rir: '1', rest: 90 },
+          { ex: 'rosca', sets: 4, reps: [8, 15], rir: '0–1', rest: 60 },
+          { ex: 'frances', sets: 4, reps: [10, 15], rir: '0–1', rest: 60 },
         ],
       },
       {
@@ -319,9 +334,10 @@ const PLANS = {
         items: [
           { ex: 'goblet', sets: 4, reps: [10, 20], rir: '1–2', rest: 120 },
           { ex: 'rdl', sets: 4, reps: [8, 12], rir: '1–2', rest: 120 },
-          { ex: 'hipthrust', sets: 3, reps: [10, 20], rir: '1–2', rest: 90 },
+          { ex: 'nordica', sets: 3, reps: [4, 8], rir: '1–2', rest: 120 },
+          { ex: 'afundo', sets: 3, reps: [10, 15], rir: '1', rest: 90 },
           { ex: 'panturrilha', sets: 4, reps: [10, 20], rir: '0–1', rest: 60 },
-          { ex: 'abdominal', sets: 3, reps: [10, 20], rir: '1–2', rest: 60 },
+          { ex: 'abdominal', sets: 3, reps: [10, 20], rir: '1', rest: 60 },
         ],
       },
       {
@@ -329,12 +345,13 @@ const PLANS = {
         name: 'Superior 2',
         focus: 'Hipertrofia · Ombros e braços',
         items: [
-          { ex: 'flexao', sets: 4, reps: [6, 25], rir: '1–2', rest: 90 },
-          { ex: 'remada1', sets: 4, reps: [8, 15], rir: '1–2', rest: 90 },
+          { ex: 'flexao', sets: 4, reps: [8, 25], rir: '1', rest: 90 },
+          { ex: 'remada1', sets: 4, reps: [8, 15], rir: '1', rest: 90 },
+          { ex: 'floorpress', sets: 3, reps: [12, 20], rir: '1', rest: 90 },
           { ex: 'lateral', sets: 4, reps: [12, 25], rir: '0–1', rest: 60 },
-          { ex: 'crucifixoinv', sets: 3, reps: [12, 25], rir: '0–1', rest: 60 },
-          { ex: 'martelo', sets: 3, reps: [10, 20], rir: '0–1', rest: 60 },
-          { ex: 'testa', sets: 3, reps: [10, 20], rir: '0–1', rest: 60 },
+          { ex: 'crucifixoinv', sets: 4, reps: [12, 25], rir: '0–1', rest: 60 },
+          { ex: 'martelo', sets: 4, reps: [10, 20], rir: '0–1', rest: 60 },
+          { ex: 'testa', sets: 4, reps: [10, 20], rir: '0–1', rest: 60 },
         ],
       },
       {
@@ -343,11 +360,11 @@ const PLANS = {
         focus: 'Unilateral · Glúteos',
         items: [
           { ex: 'bulgaro', sets: 4, reps: [8, 15], rir: '1–2', rest: 120 },
-          { ex: 'rdl1', sets: 3, reps: [8, 15], rir: '1–2', rest: 90 },
-          { ex: 'afundo', sets: 3, reps: [10, 15], rir: '1–2', rest: 90 },
+          { ex: 'rdl1', sets: 4, reps: [8, 15], rir: '1–2', rest: 90 },
+          { ex: 'hipthrust', sets: 3, reps: [10, 20], rir: '1', rest: 90 },
+          { ex: 'goblet', sets: 3, reps: [15, 25], rir: '1', rest: 90 },
           { ex: 'panturrilha', sets: 4, reps: [10, 20], rir: '0–1', rest: 60 },
           { ex: 'prancha', sets: 3, reps: [8, 12], rir: '2', rest: 45 },
-          { ex: 'fazendeiro', sets: 2, reps: [30, 60], rir: '1–2', rest: 60 },
         ],
       },
     ],
@@ -356,9 +373,9 @@ const PLANS = {
 
 const PRINCIPLES = [
   {
-    title: 'Volume: 10+ séries por músculo por semana',
+    title: 'Volume: mais séries, mais crescimento',
     body:
-      'Mais séries semanais produzem mais hipertrofia, com retorno decrescente. A faixa de ~10–20 séries por músculo é o ponto de partida mais usado. O programa fica nessa faixa na maioria dos músculos (veja o gráfico na aba Programa).',
+      'Mais séries semanais produzem mais hipertrofia, com retorno decrescente. A faixa de ~10–20 séries por músculo é a referência; como a recuperação é boa, o programa trabalha na metade de cima (~12–18). Se as cargas pararem de subir por 2 semanas ou as articulações doerem, tire 1 série de cada exercício.',
     refs: ['schoenfeld2017vol', 'pelland2024'],
   },
   {
@@ -406,12 +423,54 @@ const PRINCIPLES = [
   {
     title: 'Saúde: força + aeróbico',
     body:
-      'A OMS recomenda fortalecimento muscular 2+ dias/semana e 150–300 min de atividade aeróbica moderada. Caminhar nos 3 dias sem treino é um ótimo complemento.',
+      'A OMS recomenda fortalecimento muscular 2+ dias/semana e 150–300 min de atividade aeróbica moderada. Caminhar nos dias sem treino faz bem — só compense as calorias gastas, já que o objetivo é ganhar peso.',
     refs: ['who2020'],
   },
 ];
 
+// Nutrição para ganho de massa
+const NUTRITION = [
+  {
+    title: 'Sem superávit, não há crescimento relevante',
+    body:
+      'Para quem tem dificuldade em ganhar peso, a comida é o fator limitante, não o treino. Um superávit de ~10–20% acima da manutenção sustenta o ganho de músculo com pouco ganho de gordura. Rótulos como "ectomorfo" descrevem o corpo, mas não mudam a regra: se o peso não sobe, as calorias estão baixas.',
+    refs: ['slater2019', 'iraki2019'],
+  },
+  {
+    title: 'Ritmo: 0,25–0,5% do peso por semana',
+    body:
+      'Ganhar mais rápido que isso aumenta principalmente a gordura. Pese-se 3–7 vezes por semana, em jejum, e compare médias semanais, não o dia a dia. Registre acima e o site diz se é hora de comer mais.',
+    refs: ['garthe2013', 'iraki2019'],
+  },
+  {
+    title: 'Proteína: 1,6–2,2 g/kg por dia',
+    body:
+      'O ganho de massa com treino aumenta até ~1,6 g/kg/dia, e o limite superior do intervalo de confiança fica perto de 2,2 g/kg. Distribua em 3–5 refeições com ~0,4 g/kg cada.',
+    refs: ['morton2018'],
+  },
+  {
+    title: 'Creatina: 3–5 g por dia',
+    body:
+      'O suplemento com mais evidência para força e massa magra. Todo dia, em qualquer horário, sem necessidade de fase de saturação.',
+    refs: ['kreider2017'],
+  },
+];
+
+const HARDGAINER_TIPS = [
+  'Beba calorias: vitamina de leite integral + banana + aveia + pasta de amendoim passa fácil de 800 kcal.',
+  'Prefira alimentos densos: azeite no prato pronto, castanhas, pasta de amendoim, queijos, arroz, granola, frutas secas.',
+  'Não pule refeições: 4–5 refeições por dia em horário fixo. Fome não é um bom guia para quem come pouco.',
+  'Aumente em degraus: +150–250 kcal por dia de cada vez e reavalie depois de 2 semanas.',
+  'Durma 7–9 h: sono curto piora a recuperação e a qualidade do peso ganho.',
+];
+
 const REFERENCES = {
+  slater2019: 'Slater GJ et al. Is an energy surplus required to maximize skeletal muscle hypertrophy associated with resistance training? Front Nutr. 2019;6:131.',
+  iraki2019: 'Iraki J, Fitschen P, Espinar S, Helms E. Nutrition recommendations for bodybuilders in the off-season: a narrative review. Sports (Basel). 2019;7(7):154.',
+  garthe2013: 'Garthe I et al. Effect of nutritional intervention on body composition and performance in elite athletes. Eur J Sport Sci. 2013;13(3):295-303.',
+  morton2018: 'Morton RW et al. A systematic review, meta-analysis and meta-regression of the effect of protein supplementation on resistance training-induced gains in muscle mass and strength in healthy adults. Br J Sports Med. 2018;52(6):376-384.',
+  kreider2017: 'Kreider RB et al. International Society of Sports Nutrition position stand: safety and efficacy of creatine supplementation in exercise, sport, and medicine. J Int Soc Sports Nutr. 2017;14:18.',
+  mifflin1990: 'Mifflin MD et al. A new predictive equation for resting energy expenditure in healthy individuals. Am J Clin Nutr. 1990;51(2):241-247.',
   schoenfeld2017vol: 'Schoenfeld BJ, Ogborn D, Krieger JW. Dose-response relationship between weekly resistance training volume and increases in muscle mass: a systematic review and meta-analysis. J Sports Sci. 2017;35(11):1073-1082.',
   pelland2024: 'Pelland JC et al. The resistance training dose response: meta-regressions exploring the effects of weekly volume and frequency on muscle hypertrophy and strength gain. SportRxiv (preprint), 2024.',
   schoenfeld2016freq: 'Schoenfeld BJ, Ogborn D, Krieger JW. Effects of resistance training frequency on measures of muscle hypertrophy: a systematic review and meta-analysis. Sports Med. 2016;46(11):1689-1697.',

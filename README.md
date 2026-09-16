@@ -2,7 +2,8 @@
 
 Rotina de treino com **2 halteres**, sem banco nem barra, baseada em evidências (volume, frequência, proximidade da falha, progressão e amplitude alongada).
 
-- Programa **Superior/Inferior 4x** (Seg · Ter · Qui · Sex)
+- Programa **Superior/Inferior 4x** de volume alto, focado em ganho de massa
+- Nutrição: meta de calorias e macros, registro de peso e ajuste automático pelo ritmo de ganho
 - Imagens de cada exercício (início e fim do movimento) e link para vídeos
 - Registro de carga e repetições por série, com "última vez" e sugestão de progressão
 - Cronômetro de descanso com alerta sonoro e vibração
