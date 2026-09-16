@@ -6,7 +6,8 @@
 
   // ---------- estado ----------
 
-  const defaultState = () => ({ plan: 'ul4', sessions: [], draft: null });
+  const defaultState = () => ({ plan: 'ul4', sessions: [], drafts: {} });
+  const DRAFT_TTL = 12 * 3600 * 1000; // treino não concluído é descartado após 12 h
 
   function loadState() {
     try {
@@ -21,7 +22,15 @@
   let state = loadState();
   // planos removidos (ex.: Full Body) → volta para o programa atual
   if (!PLANS[state.plan]) state.plan = 'ul4';
-  if (state.draft && !findDayIn(state.draft.plan, state.draft.day)) state.draft = null;
+  // progresso em aberto fica guardado por treino (plano/dia), sem bloquear os outros
+  if (state.draft) {
+    state.drafts[`${state.draft.plan}/${state.draft.day}`] = state.draft;
+    delete state.draft;
+  }
+  Object.entries(state.drafts).forEach(([key, d]) => {
+    if (!findDayIn(d.plan, d.day) || Date.now() - new Date(d.started).getTime() > DRAFT_TTL) delete state.drafts[key];
+  });
+  let current = null; // rascunho do treino aberto na tela
 
   function findDayIn(planId, dayId) {
     return PLANS[planId] ? PLANS[planId].days.find((d) => d.id === dayId) : undefined;
@@ -155,20 +164,11 @@
   function viewHome() {
     const p = plan();
     const next = nextDay();
-    const draft = state.draft;
     const total = state.sessions.length;
-
-    const draftBanner = draft
-      ? `<a class="card row between" href="#treino/${esc(draft.plan)}/${esc(draft.day)}" style="text-decoration:none;color:inherit;border-color:var(--warn)">
-          <div><div class="eyebrow" style="color:var(--warn)">Em andamento</div><h3>${esc(findDay(draft.plan, draft.day)?.name || '')}</h3></div>
-          <span class="btn sm">Continuar</span>
-        </a>`
-      : '';
 
     return `
       <div class="stack-lg">
         <div class="stack">
-          ${draftBanner}
           <section class="hero stack">
             <div class="row between">
               <div>
@@ -224,10 +224,11 @@
   }
 
   function ensureDraft(planId, dayId) {
-    const d = state.draft;
-    if (d && d.plan === planId && d.day === dayId) return d;
+    const key = `${planId}/${dayId}`;
+    const d = state.drafts[key];
+    if (d && Date.now() - new Date(d.started).getTime() <= DRAFT_TTL) return d;
     const day = findDay(planId, dayId);
-    state.draft = {
+    state.drafts[key] = {
       plan: planId,
       day: dayId,
       started: new Date().toISOString(),
@@ -240,26 +241,14 @@
       ),
     };
     save();
-    return state.draft;
+    return state.drafts[key];
   }
 
   function viewWorkout(planId, dayId) {
     const day = findDay(planId, dayId);
     if (!day) return viewNotFound();
 
-    // se existe outro treino em andamento, não sobrescreve sem perguntar
-    if (state.draft && (state.draft.plan !== planId || state.draft.day !== dayId)) {
-      const other = findDay(state.draft.plan, state.draft.day);
-      return `
-        <div class="card stack">
-          <h2>Treino em andamento</h2>
-          <p>Você tem o <b>${esc(other?.name || '')}</b> em andamento. O que quer fazer?</p>
-          <a class="btn primary block" href="#treino/${esc(state.draft.plan)}/${esc(state.draft.day)}">Continuar ${esc(other?.name || '')}</a>
-          <button class="btn block danger" type="button" data-action="discard-draft" data-go="#treino/${planId}/${dayId}">Descartar e iniciar ${esc(day.name)}</button>
-        </div>`;
-    }
-
-    const draft = ensureDraft(planId, dayId);
+    const draft = (current = ensureDraft(planId, dayId));
     const totalSets = day.items.reduce((a, i) => a + i.sets, 0);
     const doneSets = Object.values(draft.entries).flat().filter((s) => s.done).length;
     const firstEx = EXERCISES[day.items[0].ex].name;
@@ -590,6 +579,7 @@
       ciencia: viewScience,
       historico: viewHistory,
     };
+    current = null;
     app.innerHTML = (views[page] || viewNotFound)();
     if (page === 'treino') requestWakeLock();
     else releaseWakeLock();
@@ -609,7 +599,7 @@
   // ---------- interações ----------
 
   function updateWorkoutProgress() {
-    const d = state.draft;
+    const d = current;
     if (!d) return;
     const all = Object.values(d.entries).flat();
     const done = all.filter((s) => s.done).length;
@@ -622,14 +612,14 @@
   app.addEventListener('input', (e) => {
     const input = e.target;
     const field = input.dataset.field;
-    if (!field || !state.draft) return;
+    if (!field || !current) return;
     const card = input.closest('.ex');
     const setIdx = +input.closest('.set-row').dataset.set;
-    const set = state.draft.entries[card.dataset.key][setIdx];
+    const set = current.entries[card.dataset.key][setIdx];
     set[field] = input.value === '' ? '' : Number(input.value);
     // carga digitada na série vale para as próximas séries ainda não feitas
     if (field === 'kg') {
-      const sets = state.draft.entries[card.dataset.key];
+      const sets = current.entries[card.dataset.key];
       sets.slice(setIdx + 1).forEach((s, i) => {
         if (s.done) return;
         s.kg = set.kg;
@@ -660,7 +650,7 @@
 
     if (action === 'check') {
       const row = btn.closest('.set-row');
-      const set = state.draft.entries[card.dataset.key][+row.dataset.set];
+      const set = current.entries[card.dataset.key][+row.dataset.set];
       // se não digitou reps, assume o mínimo da faixa sugerido no placeholder
       const repsInput = row.querySelector('[data-field="reps"]');
       if (!set.done && set.reps === '') {
@@ -673,7 +663,7 @@
       set.done = !set.done;
       row.classList.toggle('checked', set.done);
       btn.setAttribute('aria-pressed', set.done);
-      const sets = state.draft.entries[card.dataset.key];
+      const sets = current.entries[card.dataset.key];
       card.classList.toggle('done', sets.every((s) => s.done));
       save();
       updateWorkoutProgress();
@@ -682,7 +672,7 @@
     }
 
     if (action === 'add-set' || action === 'remove-set') {
-      const sets = state.draft.entries[card.dataset.key];
+      const sets = current.entries[card.dataset.key];
       if (action === 'add-set') {
         const prev = sets[sets.length - 1];
         sets.push({ kg: prev ? prev.kg : '', reps: '', done: false });
@@ -703,8 +693,9 @@
     if (action === 'finish') return finishWorkout();
 
     if (action === 'discard-draft') {
-      if (!confirm('Descartar o treino em andamento? Os registros dele serão perdidos.')) return;
-      state.draft = null;
+      if (!confirm('Descartar este treino? Os registros dele serão perdidos.')) return;
+      delete state.drafts[`${current.plan}/${current.day}`];
+      current = null;
       save();
       stopTimer();
       if (location.hash === btn.dataset.go) rerender();
@@ -724,7 +715,7 @@
   });
 
   function finishWorkout() {
-    const d = state.draft;
+    const d = current;
     const entries = {};
     Object.entries(d.entries).forEach(([key, sets]) => {
       const ex = key.split('|')[0];
@@ -748,7 +739,8 @@
       minutes: minutes > 240 ? null : minutes,
       entries,
     });
-    state.draft = null;
+    delete state.drafts[`${d.plan}/${d.day}`];
+    current = null;
     save();
     stopTimer();
     toast('Treino salvo! 💪');
