@@ -23,6 +23,8 @@ Abra http://localhost:8321.
 
 Settings → Pages → Source: *Deploy from a branch* → `main` / `(root)`.
 
+A cada mudança em CSS/JS, aumente o `?v=` dos links em `index.html` para que os celulares não fiquem com a versão em cache.
+
 Imagens: [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (domínio público).
 
 > Conteúdo educativo; não substitui orientação profissional.
