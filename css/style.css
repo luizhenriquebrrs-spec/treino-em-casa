@@ -75,6 +75,7 @@ p { margin: 0; }
   background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
+  padding-top: env(safe-area-inset-top);
 }
 
 .brand {
@@ -592,7 +593,7 @@ table.plan td:last-child { text-align: right; white-space: nowrap; color: var(--
 
 .toast {
   position: fixed;
-  top: 70px;
+  top: calc(70px + env(safe-area-inset-top));
   left: 50%;
   transform: translateX(-50%);
   z-index: 40;
